@@ -1,0 +1,55 @@
+import { RequestHandler } from "express"
+import IDataStore from "../models/IDataStore"
+import { admin, school } from "@prisma/client"
+import { StatusCodes } from "http-status-codes"
+import AdminSerivceProvider from "../services/admin"
+import { genSalt, hash } from 'bcrypt'
+
+
+class AdminController {
+    private db: IDataStore
+    private service: AdminSerivceProvider
+
+    constructor(_db: IDataStore) {
+        this.db = _db
+        this.service = new AdminSerivceProvider(this.db)
+    }
+
+    createAdmin: RequestHandler<any, { message: string, status: boolean, token?: string }, Pick<admin, 'email' | 'password' | 'schoolId'>> = async(req, res, next) => {
+        req.body.password = await hash(req.body.password, await genSalt(10))
+        
+        if(await this.db.adminExists(req.body.email)) res.status(StatusCodes.OK).json({ message: 'admin already exists', status: false })
+
+        const admin = await this.db.createAdmin(req.body)
+        const token = this.service.generateAdminToken({ id: admin.id, schoolId: admin.schoolId })   
+        res.status(StatusCodes.CREATED).json({ message: 'success', status: true, token })
+    }
+
+    getAdminById: RequestHandler<{ id: string }, { message: string, status: boolean, admin?: Pick<admin, 'id' | 'email' | 'schoolId'> }> = async(req, res, next) => {
+        const id = parseInt(req.params.id)
+        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+        const admin = await this.db.getAdminById(id)
+        res.status(StatusCodes.OK).json({ message: 'success', status: true, admin })
+    }
+
+    getAllAdmins: RequestHandler<any, { message: string, status: boolean, admins?: Array<Pick<admin, 'id' | 'email' | 'schoolId'>>}> = async(req, res, next) => {
+        const admins = await this.db.getAllAdmins()
+        res.status(StatusCodes.OK).json({ message: 'success', status: true, admins })
+    }
+
+    updateAdmin: RequestHandler<{ id: string }, { message: string, status: boolean }, Pick<admin, 'password'>> = async(req, res, next) => {
+        const adminId = parseInt(req.params.id)
+        if(Number.isNaN(adminId) || adminId < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+        await this.db.resetAdminPassword(adminId, req.body.password)
+        res.status(StatusCodes.OK).json({ message: 'success', status: true })
+    }
+
+    deleteAdmin: RequestHandler<{ id: string }, { message: string, status: boolean }> = async(req, res, next) => {
+        const adminId = parseInt(req.params.id)
+        if(Number.isNaN(adminId) || adminId < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+        await this.db.deleteAdmin(adminId)
+        res.status(StatusCodes.OK).json({ message: 'success', status: true })
+    }
+}
+
+export default AdminController
