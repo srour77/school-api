@@ -4,6 +4,7 @@ import { classRoom, school } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import Roles from "../enums/roles";
 import ClassRoomServiceProvider from "../services/classRoom";
+import joi from 'joi'
 
 class ClassRoomController {
     private db: IDataStore
@@ -24,12 +25,12 @@ class ClassRoomController {
 
     getClassRoomById: RequestHandler<{id: string}, { message: string, status: boolean, classRoom?: classRoom }> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
         
-        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
 
-        const classRoom = await this.db.getClassRoom(id)
+        if(!await this.service.classRoomManageableByAdmin(req.params.id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+
+        const classRoom = await this.db.getClassRoom(req.params.id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true, classRoom })
     }
 
@@ -41,25 +42,23 @@ class ClassRoomController {
 
     updateClassRoom: RequestHandler<{ id: string }, { message: string, status: boolean }, Pick<classRoom, 'classNumber'>> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
 
-        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+        if(!await this.service.classRoomManageableByAdmin(req.params.id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
         
-        await this.db.updateClassRoom(id, req.body)
+        await this.db.updateClassRoom(req.params.id, req.body)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })
     }
 
     deleteClassRoom: RequestHandler<{ id: string }, { message: string, status: boolean }> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
 
-        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        if(!await this.service.classRoomManageableByAdmin(req.params.id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
         
-        if(await this.db.classRoomHasStudents(id)) return res.status(StatusCodes.OK).json({ message: 'class room can not be deleted, unassign the associated students first', status: false })
+        if(await this.db.classRoomHasStudents(req.params.id)) return res.status(StatusCodes.OK).json({ message: 'class room can not be deleted, unassign the associated students first', status: false })
 
-        await this.db.deleteClassRoom(id)
+        await this.db.deleteClassRoom(req.params.id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })
     }
 }

@@ -5,6 +5,7 @@ import IDataStore from "../models/IDataStore"
 import { StatusCodes } from "http-status-codes"
 import StudentServiceProvider from "../services/student"
 import ClassRoomServiceProvider from "../services/classRoom"
+import joi from 'joi'
 
 class StudentController {
     db: IDataStore
@@ -23,45 +24,42 @@ class StudentController {
 
     getStudent: RequestHandler<{ id: string }, { message: string, status: boolean, student?: Pick<student, 'id' | 'name'> & { classRoom: Pick<classRoom, 'id' | 'classNumber'> } }> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
-        
-        if(! await this.service.studentManageableByAdmin(id, schoolId)) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        if(! await this.service.studentManageableByAdmin(req.params.id, schoolId)) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
     
-        const student = await this.db.getStudentById(id)
+        const student = await this.db.getStudentById(req.params.id)
         res.status(StatusCodes.CREATED).json({ message: 'success', status: true, student })
     }
 
     getAllStudents: RequestHandler<any, { message: string, status: boolean, students?: Array<Pick<student, 'id' | 'name'> & { classRoom: Pick<classRoom, 'id' | 'classNumber'> }> }> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        // const id = parseInt(req.params.id)
-        // if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
         const students = await this.db.getAllStudents(schoolId)
         res.status(StatusCodes.CREATED).json({ message: 'success', status: true, students })
     }
 
     updateStudent: RequestHandler<{ id: string }, { message: string, status: boolean }, Pick<student, 'name' | 'classRoomId'>> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
-        
-        if(! await this.service.studentManageableByAdmin(id, schoolId)) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        if(! await this.service.studentManageableByAdmin(req.params.id, schoolId)) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
         
         if(req.body.classRoomId && !await new ClassRoomServiceProvider(this.db).classRoomManageableByAdmin(req.body.classRoomId, schoolId))
             res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
 
-        await this.db.updateStudent(id, req.body)
+        await this.db.updateStudent(req.params.id, req.body)
         res.status(StatusCodes.CREATED).json({ message: 'success', status: true })
     }
 
     deleteStudent: RequestHandler<{ id: string }, { message: string, status: boolean }, Pick<student, 'name' | 'classRoomId'>> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
 
-        if(! await this.service.studentManageableByAdmin(id, schoolId)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
+        if(! await this.service.studentManageableByAdmin(req.params.id, schoolId)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
 
-        await this.db.deleteStudent(id)
+        await this.db.deleteStudent(req.params.id)
         res.status(StatusCodes.CREATED).json({ message: 'success', status: true })
     }
 }

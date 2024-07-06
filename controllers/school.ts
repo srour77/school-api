@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import IDataStore from "../models/IDataStore";
 import { school } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
-import Roles from "../enums/roles";
+import joi from 'joi'
 
 class SchoolController {
     private db: IDataStore
@@ -18,9 +18,9 @@ class SchoolController {
     }
 
     getSchoolById: RequestHandler<{id: string}, { message: string, status: boolean, school?: school }> = async(req, res, next) => {
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid school id', status: false })
-        const school = await this.db.getSchoolById(id)
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        const school = await this.db.getSchoolById(req.params.id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true, school })
     }
 
@@ -30,16 +30,18 @@ class SchoolController {
     }
 
     updateSchool: RequestHandler<{ id: string }, { message: string, status: boolean }, Pick<school, 'name'| 'manager'>> = async(req, res, next) => {
-        const schoolId = parseInt(req.params.id)
-        if(Number.isNaN(schoolId) || schoolId < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid school id', status: false })
-        await this.db.updateSchool(schoolId, req.body)
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        await this.db.updateSchool( req.params.id, req.body)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })
     }
 
     deleteSchool: RequestHandler<{ id: string }, { message: string, status: boolean }> = async(req, res, next) => {
-        const schoolId = parseInt(req.params.id)
-        if(Number.isNaN(schoolId) || schoolId < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid school id', status: false })
-        await this.db.deleteSchool(schoolId)
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        await this.db.deleteSchool(req.params.id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })
     }
 }

@@ -4,7 +4,7 @@ import joi from 'joi'
 export const createAdminSchema = joi.object<Pick<admin, 'email' | 'password' | 'schoolId'>>({
     email: joi.string().email().required(),
     password: joi.string().required(),
-    schoolId: joi.number().integer().required()
+    schoolId: joi.string().hex().length(24).required()
 })
 
 export const loginAdminSchema = joi.object<Pick<admin, 'email' | 'password'>>({

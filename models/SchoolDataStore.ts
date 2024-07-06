@@ -26,15 +26,15 @@ class SchoolDataStore implements IDataStore {
         await this.db.school.create({ data })
     }
 
-    async updateSchool(id: number, data: Pick<school, "name" | "manager">): Promise<void> {
+    async updateSchool(id: string, data: Pick<school, "name" | "manager">): Promise<void> {
         await this.db.school.update({ where: { id }, data })
     }
 
-    async deleteSchool(id: number): Promise<void> {
+    async deleteSchool(id: string): Promise<void> {
         await this.db.school.delete({ where: { id } })
     }
 
-    async getSchoolById(id: number): Promise<school | null> {
+    async getSchoolById(id: string): Promise<school | null> {
         const school = await this.db.school.findUnique({ where: { id } })
         return school
     }
@@ -49,7 +49,7 @@ class SchoolDataStore implements IDataStore {
         return admin
     }
 
-    async getAdminById(id: number): Promise<Pick<admin, "email" | "id" | "schoolId">> {
+    async getAdminById(id: string): Promise<Pick<admin, "email" | "id" | "schoolId">> {
         const admin = await this.db.admin.findUnique({ where: { id }, select: { id: true, email: true, schoolId: true }})
         return admin
     }
@@ -69,11 +69,11 @@ class SchoolDataStore implements IDataStore {
         return admins
     }
 
-    async resetAdminPassword(id: number, password: string): Promise<void> {
+    async resetAdminPassword(id: string, password: string): Promise<void> {
         await this.db.admin.update({ where: { id }, data: { password }})
     }
 
-    async deleteAdmin(id: number): Promise<void> {
+    async deleteAdmin(id: string): Promise<void> {
         await this.db.admin.delete({ where: { id }})
     }
 
@@ -82,27 +82,27 @@ class SchoolDataStore implements IDataStore {
         return student
     }
 
-    async getStudentById(id: number): Promise<Pick<student, "id" | "name"> & { classRoom: Pick<classRoom, "id" | "classNumber">; }> {
+    async getStudentById(id: string): Promise<Pick<student, "id" | "name"> & { classRoom: Pick<classRoom, "id" | "classNumber">; }> {
         const student = await this.db.student.findUnique({ where: { id }, select: { id: true, name: true, classRoom: { select: { id: true, classNumber: true }} } })
         return student
     }
 
-    async getStudentSchoolId(id: number): Promise<number> {
+    async getStudentSchoolId(id: string): Promise<string> {
         const student = await this.db.student.findUnique({ where: { id }, select: { schoolId: true }})
         return student?.schoolId
     }
 
-    async getAllStudents(schoolId: number): Promise<Array<Pick<student, "id" | "name"> & { classRoom: Pick<classRoom, "id" | "classNumber">; }>> {
+    async getAllStudents(schoolId: string): Promise<Array<Pick<student, "id" | "name"> & { classRoom: Pick<classRoom, "id" | "classNumber">; }>> {
         const students = await this.db.student.findMany({ where: { schoolId }, select: { id: true, name: true, classRoom: { select: { id: true, classNumber: true } } } })
         return students
     }
 
-    async updateStudent(id: number, data: Pick<student, "name" | "classRoomId">): Promise<void> {
+    async updateStudent(id: string, data: Pick<student, "name" | "classRoomId">): Promise<void> {
         const { name, classRoomId } = data
         await this.db.student.update({ where: {id }, data: { name, classRoomId } })
     }
 
-    async deleteStudent(id: number): Promise<void> {
+    async deleteStudent(id: string): Promise<void> {
         await this.db.student.delete({ where: { id }})
     }
 
@@ -110,38 +110,30 @@ class SchoolDataStore implements IDataStore {
         await this.db.classRoom.create({ data })
     }
 
-    getClassRoom(id: number): Promise<classRoom>;
-    getClassRoom(classNumber: string): Promise<classRoom>;
-    async getClassRoom(id: unknown): Promise<classRoom> {
-        let classRoom
-        if(typeof id == 'number') {
-            classRoom = await this.db.classRoom.findUnique({ where: { id }})
-        } else {
-            classRoom = await this.db.classRoom.findFirst({ where: { classNumber: id }})
-        }
-
+    async getClassRoom(id: string): Promise<classRoom> {
+        const classRoom = await this.db.classRoom.findUnique({ where: { id }})
         return classRoom
     }
 
-    async getClassRoomSchoolId(id: number): Promise<number> {
+    async getClassRoomSchoolId(id: string): Promise<string> {
         const classRoom = await this.db.classRoom.findUnique({ where: { id }, select: { schoolId: true } })
         return classRoom?.schoolId
     }
 
-    async getAllClassRooms(schoolId: number): Promise<Array<classRoom>> {
+    async getAllClassRooms(schoolId: string): Promise<Array<classRoom>> {
         const classRooms = await this.db.classRoom.findMany({ where: { schoolId }})
         return classRooms
     }
 
-    async updateClassRoom(id: number, data: Pick<classRoom, "classNumber">): Promise<void> {
+    async updateClassRoom(id: string, data: Pick<classRoom, "classNumber">): Promise<void> {
         await this.db.classRoom.update({ where: { id }, data })
     }
 
-    async deleteClassRoom(id: number): Promise<void> {
+    async deleteClassRoom(id: string): Promise<void> {
         await this.db.classRoom.delete({ where: { id }})
     }
 
-    async classRoomHasStudents(id: number): Promise<boolean> {
+    async classRoomHasStudents(id: string): Promise<boolean> {
         const classRooms = await this.db.classRoom.findUnique({ where: { id } , select: { _count: { select: { students: true } } } })
         return classRooms._count.students == 0 ? false : true 
     }

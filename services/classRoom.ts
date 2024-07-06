@@ -7,7 +7,7 @@ class ClassRoomServiceProvider {
         this.db = _db
     }
     
-    async classRoomManageableByAdmin(classRoomId: number, adminSchoolId: number): Promise<boolean> {
+    async classRoomManageableByAdmin(classRoomId: string, adminSchoolId: string): Promise<boolean> {
         return await this.db.getClassRoomSchoolId(classRoomId) != adminSchoolId ? false : true
     }
 }

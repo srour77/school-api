@@ -9,47 +9,47 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model school {
-  id         Int       @id             @default(autoincrement())
-  name       String    @db.VarChar(50)
-  manager    String    @db.VarChar(70)
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  name       String     
+  manager    String     
   admins     admin[]
   students   student[]
   classRooms classRoom[]
 }
 
 model superAdmin {
-  id       Int       @id              @default(autoincrement())
-  email    String    @db.VarChar(100) @unique()
-  password String    @db.VarChar(255)
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
+  password String  
 }
 
 model admin {
-  id       Int       @id              @default(autoincrement())
-  email    String    @db.VarChar(100) @unique()
-  password String    @db.VarChar(255)
-  schoolId Int      
-  school   school    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
+  password String  
+  schoolId String  @db.ObjectId
+  school   school  @relation(fields: [schoolId], references: [id])
 }
 
 model student {
-  id          Int          @id              @default(autoincrement())
-  schoolId    Int      
-  name        String       @db.VarChar(100)      
-  classRoomId Int      
-  school      school       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  classRoom   classRoom    @relation(fields: [classRoomId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  schoolId    String     @db.ObjectId
+  name        String     
+  classRoomId String     @db.ObjectId
+  school      school     @relation(fields: [schoolId], references: [id])
+  classRoom   classRoom  @relation(fields: [classRoomId], references: [id])
 }
 
 model classRoom {
-  id          Int       @id              @default(autoincrement())
-  schoolId    Int      
-  classNumber String    @db.VarChar(10)
-  school      school    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  schoolId    String    @db.ObjectId
+  classNumber String    
+  school      school    @relation(fields: [schoolId], references: [id])
   students    student[]
   @@unique([schoolId, classNumber])
 }

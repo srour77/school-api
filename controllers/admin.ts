@@ -4,6 +4,7 @@ import { admin, school } from "@prisma/client"
 import { StatusCodes } from "http-status-codes"
 import AdminSerivceProvider from "../services/admin"
 import { compare, genSalt, hash } from 'bcrypt'
+import joi from 'joi'
 
 
 class AdminController {
@@ -37,9 +38,9 @@ class AdminController {
     }
 
     getAdminById: RequestHandler<{ id: string }, { message: string, status: boolean, admin?: Pick<admin, 'id' | 'email' | 'schoolId'> }> = async(req, res, next) => {
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
-        const admin = await this.db.getAdminById(id)
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        const admin = await this.db.getAdminById(req.params.id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true, admin })
     }
 
@@ -49,16 +50,16 @@ class AdminController {
     }
 
     updateAdmin: RequestHandler<{ id: string }, { message: string, status: boolean }, Pick<admin, 'password'>> = async(req, res, next) => {
-        const adminId = parseInt(req.params.id)
-        if(Number.isNaN(adminId) || adminId < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
-        await this.db.resetAdminPassword(adminId, req.body.password)
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        await this.db.resetAdminPassword(req.params.id, req.body.password)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })
     }
 
     deleteAdmin: RequestHandler<{ id: string }, { message: string, status: boolean }> = async(req, res, next) => {
-        const adminId = parseInt(req.params.id)
-        if(Number.isNaN(adminId) || adminId < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
-        await this.db.deleteAdmin(adminId)
+        if(!joi.string().hex().length(24).validate(req.params.id)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid admin id', status: false })
+
+        await this.db.deleteAdmin(req.params.id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })
     }
 }
