@@ -18,7 +18,7 @@ class StudentRouter {
     buildRoutes(): void {
         this.router.post('/create', authenticateClient, authorizeClient([Roles.Admin]), validateRequestBody(createStudentSchema), this.controller.createStudent)
         this.router.get('/get/:id', authenticateClient, authorizeClient([Roles.Admin]), this.controller.getStudent)
-        this.router.get('/getAll', authenticateClient, authorizeClient([Roles.SuperAdmin]), this.controller.getAllStudents)
+        this.router.get('/getAll', authenticateClient, authorizeClient([Roles.Admin]), this.controller.getAllStudents)
         this.router.put('/update/:id', authenticateClient, authorizeClient([Roles.Admin]), validateRequestBody(updateStudentSchema), this.controller.updateStudent)
         this.router.delete('/delete/:id', authenticateClient, authorizeClient([Roles.Admin]), this.controller.deleteStudent)
     }

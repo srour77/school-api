@@ -14,6 +14,8 @@ interface IClassRoom {
     updateClassRoom(id: number, data: Pick<classRoom, 'classNumber'>): Promise<void>;
 
     deleteClassRoom(id: number): Promise<void>;
+
+    classRoomHasStudents(id: number): Promise<boolean>;
 }
 
 export default IClassRoom

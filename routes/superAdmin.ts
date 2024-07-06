@@ -16,7 +16,8 @@ class SuperAdminRouter {
     }
 
     buildRoutes(): void {
-        this.router.post('/create', authenticateClient, authorizeClient([Roles.SuperAdmin]), validateRequestBody(createSuperAdminSchema), this.controller.createSuperAdmin)
+        this.router.post('/create', validateRequestBody(createSuperAdminSchema), this.controller.createSuperAdmin)
+        this.router.post('/login', validateRequestBody(createSuperAdminSchema), this.controller.loginSuperAdmin)
     }
 
     getRouter(): Router {

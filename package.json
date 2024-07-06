@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node dist/index.cjs",
+    "start": "nodemon app.ts",
     "build": "npx esbuild app.ts --bundle --platform=node --outfile=dist/index.cjs --sourcemap --packages=external",
     "dev": "nodemon app.ts"
   },

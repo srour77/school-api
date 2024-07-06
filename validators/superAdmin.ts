@@ -5,3 +5,8 @@ export const createSuperAdminSchema = joi.object<Pick<superAdmin, 'email' | 'pas
     email: joi.string().email().required(),
     password: joi.string().required()
 })
+
+export const loginSuperAdminSchema = joi.object<Pick<superAdmin, 'email' | 'password'>>({
+    email: joi.string().email().required(),
+    password: joi.string().required()
+})

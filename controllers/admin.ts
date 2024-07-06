@@ -3,7 +3,7 @@ import IDataStore from "../models/IDataStore"
 import { admin, school } from "@prisma/client"
 import { StatusCodes } from "http-status-codes"
 import AdminSerivceProvider from "../services/admin"
-import { genSalt, hash } from 'bcrypt'
+import { compare, genSalt, hash } from 'bcrypt'
 
 
 class AdminController {
@@ -15,10 +15,21 @@ class AdminController {
         this.service = new AdminSerivceProvider(this.db)
     }
 
+    loginAdmin: RequestHandler<any, { message: string, status: boolean, token?: string }, Pick<admin, 'email' | 'password'>> = async(req, res, next) => {
+        const admin = await this.db.getAdminByEmail(req.body.email)
+        if(!admin) return res.status(StatusCodes.OK).json({ message: 'no such admin exists', status: false })
+
+        const passwordMatched = await compare(req.body.password, admin.password)
+        if(!passwordMatched) return res.status(StatusCodes.OK).json({ message: 'incorect email/password', status: false })
+
+        const token = this.service.generateAdminToken({ id: admin.id, schoolId: admin.schoolId })
+        res.status(StatusCodes.CREATED).json({ message: 'success', status: true, token })
+    }
+
     createAdmin: RequestHandler<any, { message: string, status: boolean, token?: string }, Pick<admin, 'email' | 'password' | 'schoolId'>> = async(req, res, next) => {
         req.body.password = await hash(req.body.password, await genSalt(10))
         
-        if(await this.db.adminExists(req.body.email)) res.status(StatusCodes.OK).json({ message: 'admin already exists', status: false })
+        if(await this.db.adminExists(req.body.email)) return res.status(StatusCodes.OK).json({ message: 'admin already exists', status: false })
 
         const admin = await this.db.createAdmin(req.body)
         const token = this.service.generateAdminToken({ id: admin.id, schoolId: admin.schoolId })   

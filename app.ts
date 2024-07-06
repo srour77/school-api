@@ -24,7 +24,7 @@ const db: IDataStore = new SchoolDataStore()
 
 app.use('/school', new SchoolRouter(new SchoolController(db)).getRouter())
 app.use('/admin', new AdminRouter(new AdminController(db)).getRouter())
-app.use('/students', new StudentRouter(new StudentController(db)).getRouter())
+app.use('/student', new StudentRouter(new StudentController(db)).getRouter())
 app.use('/classRoom', new ClassRoomRouter(new ClassRoomController(db)).getRouter())
 app.use('/superAdmin', new SuperAdminRouter(new SuperAdminController(db)).getRouter())
 

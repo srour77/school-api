@@ -17,6 +17,11 @@ class SchoolDataStore implements IDataStore {
         return await this.db.superAdmin.findFirst({ where: { email }}) ? true : false
     }
 
+    async getSuperAdmin(email: string): Promise<superAdmin | null> {
+        const sueprAdmin = await this.db.superAdmin.findFirst({ where: { email }})
+        return sueprAdmin || null
+    }
+
     async createSchool(data: Pick<school, "name" | "manager">): Promise<void> {
         await this.db.school.create({ data })
     }
@@ -46,6 +51,11 @@ class SchoolDataStore implements IDataStore {
 
     async getAdminById(id: number): Promise<Pick<admin, "email" | "id" | "schoolId">> {
         const admin = await this.db.admin.findUnique({ where: { id }, select: { id: true, email: true, schoolId: true }})
+        return admin
+    }
+
+    async getAdminByEmail(email: string): Promise<Pick<admin, 'id' | 'schoolId' | "email" | "password">> {
+        const admin =  await this.db.admin.findFirst({ where: { email }, select: { id: true, schoolId: true, email: true, password: true } })
         return admin
     }
 
@@ -129,6 +139,11 @@ class SchoolDataStore implements IDataStore {
 
     async deleteClassRoom(id: number): Promise<void> {
         await this.db.classRoom.delete({ where: { id }})
+    }
+
+    async classRoomHasStudents(id: number): Promise<boolean> {
+        const classRooms = await this.db.classRoom.findUnique({ where: { id } , select: { _count: { select: { students: true } } } })
+        return classRooms._count.students == 0 ? false : true 
     }
 }
 

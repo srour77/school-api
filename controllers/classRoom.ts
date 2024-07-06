@@ -27,7 +27,7 @@ class ClassRoomController {
         const id = parseInt(req.params.id)
         if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
         
-        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
 
         const classRoom = await this.db.getClassRoom(id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true, classRoom })
@@ -42,9 +42,9 @@ class ClassRoomController {
     updateClassRoom: RequestHandler<{ id: string }, { message: string, status: boolean }, Pick<classRoom, 'classNumber'>> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
         const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
+        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
 
-        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
         
         await this.db.updateClassRoom(id, req.body)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })
@@ -53,9 +53,11 @@ class ClassRoomController {
     deleteClassRoom: RequestHandler<{ id: string }, { message: string, status: boolean }> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
         const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
+        if(Number.isNaN(id) || id < 1) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid ClassRoom id', status: false })
 
-        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+        if(!await this.service.classRoomManageableByAdmin(id, schoolId)) return res.status(StatusCodes.OK).json({ message: 'invalid class room id', status: false })
+        
+        if(await this.db.classRoomHasStudents(id)) return res.status(StatusCodes.OK).json({ message: 'class room can not be deleted, unassign the associated students first', status: false })
 
         await this.db.deleteClassRoom(id)
         res.status(StatusCodes.OK).json({ message: 'success', status: true })

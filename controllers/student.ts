@@ -32,11 +32,11 @@ class StudentController {
         res.status(StatusCodes.CREATED).json({ message: 'success', status: true, student })
     }
 
-    getAllStudents: RequestHandler<{ id: string }, { message: string, status: boolean, students?: Array<Pick<student, 'id' | 'name'> & { classRoom: Pick<classRoom, 'id' | 'classNumber'> }> }> = async(req, res, next) => {
+    getAllStudents: RequestHandler<any, { message: string, status: boolean, students?: Array<Pick<student, 'id' | 'name'> & { classRoom: Pick<classRoom, 'id' | 'classNumber'> }> }> = async(req, res, next) => {
         const { [Roles.Client]: { schoolId } } = res.locals
-        const id = parseInt(req.params.id)
-        if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
-        const students = await this.db.getAllStudents(id)
+        // const id = parseInt(req.params.id)
+        // if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
+        const students = await this.db.getAllStudents(schoolId)
         res.status(StatusCodes.CREATED).json({ message: 'success', status: true, students })
     }
 
@@ -59,7 +59,7 @@ class StudentController {
         const id = parseInt(req.params.id)
         if(Number.isNaN(id) || id < 1) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
 
-        if(! await this.service.studentManageableByAdmin(id, schoolId)) res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
+        if(! await this.service.studentManageableByAdmin(id, schoolId)) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'invalid student id', status: false })
 
         await this.db.deleteStudent(id)
         res.status(StatusCodes.CREATED).json({ message: 'success', status: true })

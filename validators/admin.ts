@@ -7,6 +7,11 @@ export const createAdminSchema = joi.object<Pick<admin, 'email' | 'password' | '
     schoolId: joi.number().integer().required()
 })
 
+export const loginAdminSchema = joi.object<Pick<admin, 'email' | 'password'>>({
+    email: joi.string().email().required(),
+    password: joi.string().required()
+})
+
 export const updateAdminSchema = joi.object<Pick<admin, 'password'>>({
     password: joi.string().required()
 })

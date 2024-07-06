@@ -3,7 +3,7 @@ import { authenticateClient, authorizeClient } from "../middlewares/auth";
 import Roles from "../enums/roles";
 import validateRequestBody from "../middlewares/validateReqBody";
 import AdminController from "../controllers/admin";
-import { createAdminSchema } from "../validators/admin";
+import { createAdminSchema, loginAdminSchema } from "../validators/admin";
 
 class AdminRouter {
     private controller: AdminController
@@ -16,6 +16,7 @@ class AdminRouter {
     }
 
     buildRoutes(): void {
+        this.router.post('/login', validateRequestBody(loginAdminSchema), this.controller.loginAdmin)
         this.router.post('/create', authenticateClient, authorizeClient([Roles.SuperAdmin]), validateRequestBody(createAdminSchema), this.controller.createAdmin)
         this.router.get('/get/:id', authenticateClient, authorizeClient([Roles.SuperAdmin]), this.controller.getAdminById)
         this.router.get('/getAll', authenticateClient, authorizeClient([Roles.SuperAdmin]), this.controller.getAllAdmins)
