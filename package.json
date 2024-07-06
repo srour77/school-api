@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "prestart": "npx prisma generate",
     "start": "nodemon api/index.ts",
     "dev": "nodemon app.ts"
   },
