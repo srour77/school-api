@@ -1,4 +1,4 @@
 {
     "version": 2,
-    "rewrites": [ { "source": "/(.*)", "destination": "./dist/index.cjs"} ]
+    "rewrites": [ { "source": "/(.*)", "destination": "./api"} ]
 }

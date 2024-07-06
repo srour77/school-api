@@ -31,4 +31,6 @@ app.use('/superAdmin', new SuperAdminRouter(new SuperAdminController(db)).getRou
 app.use(errorHandler)
 app.use((req, res, next) =>res.status(StatusCodes.NOT_FOUND).json({ message: 'no such resource found' }))
 
-app.listen(3000, () => console.log('server is running...'))
+app.listen(process.env.PORT, () => console.log('server is running...'))
+
+export default app
