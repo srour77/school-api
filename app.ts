@@ -27,7 +27,7 @@ app.use('/admin', new AdminRouter(new AdminController(db)).getRouter())
 app.use('/student', new StudentRouter(new StudentController(db)).getRouter())
 app.use('/classRoom', new ClassRoomRouter(new ClassRoomController(db)).getRouter())
 app.use('/superAdmin', new SuperAdminRouter(new SuperAdminController(db)).getRouter())
-app.get('/', (req, res, next) => console.log('welcome home'))
+app.get('/', (req, res, next) => res.status(200).json('welcome home'))
 
 app.use(errorHandler)
 app.use((req, res, next) =>res.status(StatusCodes.NOT_FOUND).json({ message: 'no such resource found' }))
