@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "start": "node dist/index.cjs",
+    "build": "npx esbuild app.ts --bundle --platform=node --outfile=dist/index.cjs --sourcemap --packages=external",
+    "dev": "nodemon app.ts"
+  },
   "dependencies": {
     "@prisma/client": "^5.16.1",
     "@types/joi": "^17.2.3",
