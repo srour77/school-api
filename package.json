@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "ts-node api/index.ts",
+    "start": "nodemon api/index.ts",
     "dev": "nodemon app.ts"
   },
   "dependencies": {
