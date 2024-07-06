@@ -3,7 +3,7 @@ import IDataStore from "../models/IDataStore"
 import { admin, school } from "@prisma/client"
 import { StatusCodes } from "http-status-codes"
 import AdminSerivceProvider from "../services/admin"
-import { compare, genSalt, hash } from 'bcrypt'
+import { compare, genSalt, hash } from 'bcryptjs'
 import joi from 'joi'
 
 

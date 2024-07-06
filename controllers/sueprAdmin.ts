@@ -2,7 +2,7 @@ import { json, RequestHandler } from "express"
 import IDataStore from "../models/IDataStore"
 import { admin, superAdmin } from "@prisma/client"
 import { StatusCodes } from "http-status-codes"
-import { compare, genSalt, hash } from 'bcrypt'
+import { compare, genSalt, hash } from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Roles from "../enums/roles"
 
