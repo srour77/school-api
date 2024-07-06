@@ -25,13 +25,13 @@ model school {
 model superAdmin {
   id       Int       @id              @default(autoincrement())
   email    String    @db.VarChar(100) @unique()
-  password String    @db.VarChar(50)
+  password String    @db.VarChar(255)
 }
 
 model admin {
   id       Int       @id              @default(autoincrement())
   email    String    @db.VarChar(100) @unique()
-  password String    @db.VarChar(50)
+  password String    @db.VarChar(255)
   schoolId Int      
   school   school    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
